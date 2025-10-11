@@ -26,6 +26,6 @@ const connectDB = async()=>{
     }
 }
 
-app.post("/test",async(req,res)=>{
+// app.post("/test",async(req,res)=>{
     
-})
+// })
