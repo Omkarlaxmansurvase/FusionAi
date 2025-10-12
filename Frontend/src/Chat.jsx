@@ -1,5 +1,5 @@
 import "./Chat.css";
-import React, { useContext } from "react";
+import React, { useContext,useState,useEffect } from "react";
 import { MyContext } from "./MyContext";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -26,7 +26,7 @@ function Chat(){
         {newChat && <h1>Start a New Chat!</h1>}
         <div className="chat">
             {
-                prevChats.slice(0,-1)((chat,index)=>
+                prevChats?.slice(0,-1).map((chat,index)=>
                 <div className={chat.roll==="user"?"userDiv":"gptDiv"} key={idx}>
                     {
                         chat.role==="user"?
