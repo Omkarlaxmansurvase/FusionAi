@@ -1,19 +1,29 @@
 import "./Sidebar.css"
-import { useContext } from "react";
+import { use, useContext, useEffect } from "react";
 import { MyContext } from "./MyContext";
+// import { get, set } from "mongoose";
 function Sidebar(){
-    const {allThreads,setCurrThreadId,setAllThreads}=useContext(MyContext);
+    const {allThreads,CurrThreadId,setAllThreads}=useContext(MyContext);
 
     const getallThreads = async()=>{
         try{
             const response = await fetch('http://localhost:8000/api/thread');
             const res = await response.json();
-            console.log(res);
+            const filteredData= res.map(thread=>({threadId:thread.threadId,title:thread.title}));
+            console.log("Filtered Data:",filteredData);
+            console.log(filteredData);
+            setAllThreads(filteredData);
+
         }
         catch(e){
             console.log(e);
         }
     }
+
+    useEffect(()=>{
+        getallThreads();
+
+    },[CurrThreadId])
 
     return(
         <section className="sidebar">
@@ -23,9 +33,11 @@ function Sidebar(){
             </button>
 
             <ul className="history">
-                <li>History1</li>
-                <li>History2</li>
-                <li>History3</li>
+                {
+                    allThreads?.map((thread,idx)=>(
+                        <li key={idx}>{thread.title}</li>
+                    ))
+                }
             </ul>
 
             <div className="sign">
