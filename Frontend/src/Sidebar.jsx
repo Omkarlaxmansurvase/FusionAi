@@ -5,7 +5,7 @@ import { MyContext } from "./MyContext";
 import {v1 as uuidv1} from "uuid";
 
 function Sidebar(){
-    const {allThreads,CurrThreadId,setAllThreads,setNewChat,setPrompt,setReply,setCurrThreadId,setPrevChats}=useContext(MyContext);
+    const {allThreads,currThreadId,setAllThreads,setNewChat,setPrompt,setReply,setCurrThreadId,setPrevChats}=useContext(MyContext);
 
     const getallThreads = async()=>{
         try{
@@ -25,7 +25,7 @@ function Sidebar(){
     useEffect(()=>{
         getallThreads();
 
-    },[CurrThreadId])
+    },[currThreadId])
 
     const createNewChat=async()=>{
         try{
@@ -48,17 +48,35 @@ function Sidebar(){
             const res = await response.json();
             console.log("Fetched Thread Data:",res);
             const formattedChats = res.messages?.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    })) || [];
+            role: msg.role,
+            content: msg.content
+            })) || [];
 
-setPrevChats(formattedChats);
+            setPrevChats(formattedChats);
 
             // setPrevChats(res);
             setNewChat(false);
             setReply(null); 
         }
         catch(err){
+            console.log(err);
+        }
+    }
+
+    const deleteThread = async (threadId) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/thread/${threadId}`, {method: "DELETE"});
+            const res = await response.json();
+            console.log(res);
+
+            //updated threads re-render
+            setAllThreads(prev => prev.filter(thread => thread.threadId !== threadId));
+
+            if(threadId === currThreadId) {
+                createNewChat();
+            }
+
+        } catch(err) {
             console.log(err);
         }
     }
@@ -75,7 +93,16 @@ setPrevChats(formattedChats);
                     allThreads?.map((thread,idx)=>(
                         <li key={idx}
                         onClick={()=>changeThread(thread.threadId)}
-                        >{thread.title}</li>
+                        className={thread.threadId===currThreadId?"highlighted":""}
+                        >{thread.title}
+                        <i className="fa-solid fa-trash"
+                        onClick={(e)=>{
+                            e.stopPropagation(); // this prevents event bubbling that means jabh child element pr click hoga to parent pr click event nhi jayega
+                            deleteThread(thread.threadId);
+                        }}
+                        
+                        ></i>
+                        </li>
                     ))
                 }
             </ul>

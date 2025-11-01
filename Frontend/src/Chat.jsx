@@ -34,7 +34,7 @@ function Chat(){
       {
         Array.isArray(prevChats) && prevChats.length > 0 ? (
           prevChats.map((chat, idx) => (
-            <div className={chat.role === "user" ? "userDiv" : "gptDiv"} key={idx}>
+            <div className={chat.role === "user" ? "userDiv" : "gptDiv"} key={"non-typing"}>
               {chat.role === "user"
                 ? <p className="userMesaage">{chat.content}</p>
                 : <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{chat.content}</ReactMarkdown>
@@ -48,7 +48,7 @@ function Chat(){
 
       {/* Typing effect only when new reply comes */}
       {LatestReply && (
-        <div className="gptDiv">
+        <div className="gptDiv" key={"typing"}>
           <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{LatestReply}</ReactMarkdown>
         </div>
       )}
