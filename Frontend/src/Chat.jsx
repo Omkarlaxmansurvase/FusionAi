@@ -6,10 +6,15 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 
 function Chat(){
+
     const {newChat,prevChats,reply}=useContext(MyContext);
     const [LatestReply, setLatestReply] = useState(null);
 
     useEffect(()=>{
+        if(reply==null){
+            setLatestReply(null);
+            return;
+        }
         if(!prevChats.length) return;
         const content = reply.split("")//individual words
         let idx =0;
@@ -21,47 +26,36 @@ function Chat(){
         },40
     )
     },[prevChats,reply])
-    return(
-        <>
-        {newChat && <h1>Start a New Chat!</h1>}
-        <div className="chat">
-            {
-                prevChats?.slice(0,-1).map((chat,index)=>
-                <div className={chat.roll==="user"?"userDiv":"gptDiv"} key={idx}>
-                    {
-                        chat.role==="user"?
-                        <p className="userMesaage">{chat.content}</p> :
-                        <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{chat.content}</ReactMarkdown>
-                    }
-                    {
-                    prevChats.length > 0  && (
-                        <>
-                            {
-                                LatestReply === null ? (
-                                    <div className="gptDiv" key={"non-typing"} >
-                                    <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{prevChats[prevChats.length-1].content}</ReactMarkdown>
-                                </div>
-                                ) : (
-                                    <div className="gptDiv" key={"typing"} >
-                                     <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{latestReply}</ReactMarkdown>
-                                </div>
-                                )
+    return (
+  <>
+    {newChat && <h1>Start a New Chat!</h1>}
 
-                            }
-                        </>
-                    )
-                }
+    <div className="chat">
+      {
+        Array.isArray(prevChats) && prevChats.length > 0 ? (
+          prevChats.map((chat, idx) => (
+            <div className={chat.role === "user" ? "userDiv" : "gptDiv"} key={idx}>
+              {chat.role === "user"
+                ? <p className="userMesaage">{chat.content}</p>
+                : <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{chat.content}</ReactMarkdown>
+              }
+            </div>
+          ))
+        ) : (
+          !newChat && <h2>No messages in this thread yet</h2>
+        )
+      }
 
-                </div>
-                )
-            }
-            
-            
-            
-            
+      {/* Typing effect only when new reply comes */}
+      {LatestReply && (
+        <div className="gptDiv">
+          <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{LatestReply}</ReactMarkdown>
         </div>
-        </>
-    )
+      )}
+    </div>
+  </>
+);
+
 }
 
 export default Chat;

@@ -5,20 +5,38 @@ import getOpenAiResponse from "../utils/openai.js";
 const router = express.Router();
 
 // test
-router.post("/test",async(req,res)=>{
-    try{
-        const thread = new Thread({
-            threadId:"Test Thread",
-            title:"tsting thread",
-        });
-        const response = await thread.save();
-        res.send(response);
+// ✅ Clean /test route
+router.post("/test", async (req, res) => {
+  try {
+    const { threadId, title, messages } = req.body;
+
+    // Validate
+    if (!threadId || !title) {
+      return res.status(400).json({ error: "threadId and title are required" });
     }
-    catch(error){
-        console.error("Error:",error);
-        res.status(500).json({error:"Internal server error"})
+
+    // Check if thread already exists
+    let existing = await Thread.findOne({ threadId });
+    if (existing) {
+      return res.status(400).json({ error: "ThreadId already exists. Use a new one." });
     }
-})
+
+    // Create a new thread
+    const thread = new Thread({
+      threadId,
+      title,
+      messages: messages || []
+    });
+
+    const response = await thread.save();
+    res.status(201).json({ message: "Thread saved successfully", thread: response });
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 // test
 router.post("/test",async(req,res)=>{
@@ -51,20 +69,24 @@ router.get("/thread", async(req,res)=>{
     }
 })
 
-router.get("/thread/:threadId",async(req,res)=>{
-    const {threadId}=req.params;
+router.get("/thread/:threadId", async (req, res) => {
+  const { threadId } = req.params;
 
-    try{
-        const thread = await Thread.findOne({threadId});
-        if(!thread){
-            res.status(404).json({error:"Thread not found"});
-        }
+  try {
+    const thread = await Thread.findOne({ threadId });
+    if (!thread) {
+      return res.status(404).json({ error: "Thread not found" });
     }
-    catch(err){
-        console.log(err);
-        res.status(500).json({error:"failed to fetch the chat"})
-    }
-})
+
+    // ✅ Send thread data to frontend
+    res.status(200).json(thread);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch the chat" });
+  }
+});
+
 
 router.delete("/thread/:threadId",async(req,res)=>{
     const {threadId}=req.params;
